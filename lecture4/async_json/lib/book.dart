@@ -12,12 +12,13 @@ class Book {
     required this.borrowCount,
   });
 
-  /// JSON -> 模型。JSON 数字可能是 int 或 double，统一 as num 再 toInt 最稳。
+  /// JSON -> 模型。JSON 数字可能是 int 或 double，统一 as num 再 toInt 最稳；
+  /// 字段可能缺失时先判 null 再给默认值（borrowCount 缺失默认 0）。
   factory Book.fromJson(Map<String, dynamic> j) => Book(
-        id: j['id'] as String,
-        title: j['title'] as String,
-        category: j['category'] as String,
-        borrowCount: (j['borrowCount'] as num).toInt(),
+        id: j['id'] as String? ?? 'unknown',
+        title: j['title'] as String? ?? '未知书名',
+        category: j['category'] as String? ?? '未分类',
+        borrowCount: (j['borrowCount'] as num?)?.toInt() ?? 0,
       );
 
   /// 模型 -> JSON，用于 roundtrip 反向验证。
