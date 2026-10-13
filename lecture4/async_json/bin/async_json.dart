@@ -1,5 +1,35 @@
-import 'package:async_json/async_json.dart' as async_json;
+import 'dart:convert';
+import 'dart:io';
 
-void main(List<String> arguments) {
-  print('Hello world: ${async_json.calculate()}!');
+import 'package:async_json/book.dart';
+import 'package:path/path.dart' as p;
+
+/// 课堂案例：异步读取 data/books.json，解析为 Book 列表并汇总输出。
+Future<void> main() async {
+  final file = File(p.join('data', 'books.json'));
+  // await 等待文件读取完成，但不阻塞事件循环
+  final text = await file.readAsString();
+  final list = jsonDecode(text) as List<dynamic>;
+  final books = list
+      .map((e) => Book.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+  print('图书总数: ${books.length}');
+
+  // Map 统计各类目数量
+  final byCategory = <String, int>{};
+  for (final b in books) {
+    byCategory[b.category] = (byCategory[b.category] ?? 0) + 1;
+  }
+  print('各类目数量:');
+  byCategory.forEach((category, count) {
+    print('  $category: $count 本');
+  });
+
+  // 借阅量 Top3
+  final top = [...books]..sort((a, b) => b.borrowCount.compareTo(a.borrowCount));
+  print('借阅量 Top3:');
+  for (var i = 0; i < 3 && i < top.length; i++) {
+    print('  第${i + 1}名: ${top[i].title}(${top[i].borrowCount}次)');
+  }
 }
